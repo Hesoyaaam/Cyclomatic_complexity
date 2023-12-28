@@ -260,7 +260,7 @@ namespace FITUR
                          "- Total Nodes (N) \n" +
                          "- Total Number of Connected Components (P) \n" +
                          "- McCabe Cyclomatic Complexity((V(G) = E - N + 2P)).\n" +
-                         "3. Click 'Export CSV' to save data in a CSV file/n" +
+                         "3. Click 'Export CSV' to save data in a CSV file\n" +
                          "4. Click 'Clear' to clear all data in this feature";
 
             MessageBox.Show(helpMessage, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
