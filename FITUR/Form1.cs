@@ -39,6 +39,7 @@ namespace FITUR
                 txtdirectory.Text = openfile.FileName;
             }
         }
+
         private void btnHitung_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(uploadedFilePath) && File.Exists(uploadedFilePath))
@@ -47,13 +48,16 @@ namespace FITUR
                 {
                     //Memanggil hitung KompleksitasSiklomata
                     KompleksitasSiklomata(uploadedFilePath);
-                    //Menampilkan kode yang di upload
+                    //Menampilkan kode yang diupload
                     txtOutput2.Text = uploadedFilePath;
 
                 }
+                catch (FileNotFoundException ex)
+                {
+                    MessageBox.Show($"File not found: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 catch (Exception ex)
                 {
-                    txtOutput.Text = $"Error: {ex.Message}";
                     MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -61,7 +65,6 @@ namespace FITUR
             {
                 MessageBox.Show("Select a file first.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-
         }
 
         private void KompleksitasSiklomata(string filePath)
@@ -74,21 +77,22 @@ namespace FITUR
                 int jumlahTepi = HitungTepi(code);
 
                 // Hitung jumlah simpul
-                int jumlahSimpul = HitungSimpul(code);
+                int jumlahSimpul = HitungNode(code);
 
                 // Hitung jumlah Komponen
-                int jumlahKomponen = KomponenTerhubung(code);
+                int jumlahKomponen = HitungKomponenTerhubung(code);
 
                 // Hitung metrik tambahan sesuai kebutuhan (contoh: panjang rata-rata baris kode)
                 double komplesitasSiklomata = jumlahTepi - jumlahSimpul + 2 * jumlahKomponen;
+
+                string complexityCategory = KategorisasiKompleksitasSiklomata(komplesitasSiklomata);
 
                 // Menampilkan metrik di TextBox
                 string metrikMessage = $"Total Edges: {jumlahTepi}\r\n" +
                                        $"Total Nodes: {jumlahSimpul}\r\n" +
                                        $"Total Number of Connected Components: {jumlahKomponen}\r\n" +
-                                       $"Cyclomatic Complexity (V(G) = E - N + 2P) = {komplesitasSiklomata}\r\n";
-                //$"'If less than 10 is low, 10 - 20 is medium, more than 20 is complex\r\n'" +
-                //$"This Cyclomatic Complexity {komplesitasSiklomata} is {complexityCategory}";
+                                       $"Cyclomatic Complexity (V(G) = E - N + 2P) = {komplesitasSiklomata}\r\n" +
+                                       $"Complexity Category: {complexityCategory}";
 
                 txtOutput.Text = metrikMessage;
                 uploadedFilePath = code;
@@ -99,6 +103,23 @@ namespace FITUR
                 MessageBox.Show("File not found.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+        private string KategorisasiKompleksitasSiklomata(double kompleksitasSiklomata)
+        {
+            if (kompleksitasSiklomata <= 10)
+            {
+                return "Low";
+            }
+            else if (kompleksitasSiklomata <= 20)
+            {
+                return "Medium";
+            }
+            else
+            {
+                return "High";
+            }
+        }
+
         private static int HitungTepi(string code)
         {
             // Implementasi kompleksitas siklomatik di sini (gunakan metode sebelumnya atau metode lainnya)
@@ -114,7 +135,7 @@ namespace FITUR
 
                 if (trimmedLine.StartsWith("if") || trimmedLine.StartsWith("else") || trimmedLine.StartsWith("else if") || trimmedLine.StartsWith("while") ||
                     trimmedLine.StartsWith("for") || trimmedLine.StartsWith("case") || trimmedLine.StartsWith("catch") ||
-                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("match") || trimmedLine.StartsWith("&&") || trimmedLine.StartsWith("||"))
+                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("try") || trimmedLine.StartsWith("&&") || trimmedLine.StartsWith("||"))
                 {
                     edgeCount++;
 
@@ -155,7 +176,8 @@ namespace FITUR
             }
             return edgeCount + 1;
         }
-        private int HitungSimpul(string code)
+
+        private int HitungNode(string code)
         {
             // Implementasi kompleksitas siklomatik di sini (gunakan metode sebelumnya atau metode lainnya)
             int nodeCount = 0;
@@ -167,15 +189,15 @@ namespace FITUR
 
                 if (trimmedLine.StartsWith("if") || trimmedLine.StartsWith("else") || trimmedLine.StartsWith("else if") || trimmedLine.StartsWith("while") ||
                     trimmedLine.StartsWith("for") || trimmedLine.StartsWith("foreach") || trimmedLine.StartsWith("case") || trimmedLine.StartsWith("catch") ||
-                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("match") || trimmedLine.Contains("main("))
+                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("try") || trimmedLine.Contains("main("))
                 {
                     nodeCount++;
                 }
-
             }
             return nodeCount + 1;
         }
-        private int KomponenTerhubung(string code)
+
+        private int HitungKomponenTerhubung(string code)
         {
             int komponenterhubung = 0;
 
@@ -211,7 +233,7 @@ namespace FITUR
                 // Tambahkan node ke graf jika baris kode adalah percabangan atau loop
                 if (trimmedLine.StartsWith("if") || trimmedLine.StartsWith("else") || trimmedLine.StartsWith("else if") || trimmedLine.StartsWith("while") ||
                     trimmedLine.StartsWith("for") || trimmedLine.StartsWith("foreach") || trimmedLine.StartsWith("case") || trimmedLine.StartsWith("catch") ||
-                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("match") || trimmedLine.Contains("main("))
+                    trimmedLine.StartsWith("switch") || trimmedLine.StartsWith("try") || trimmedLine.Contains("main("))
                 {
                     // Gunakan percabangan atau loop sebagai node
                     currentNode = trimmedLine;
@@ -233,6 +255,7 @@ namespace FITUR
 
             return kontrolAliranGraf;
         }
+
         // Konsep ini untuk menelusuri graf kontrol aliran dari kode sumber
         // Mengecek apakah apakah setiap simpul telah dikunjungi dan melanjutkan untuk menjelajahi setiap tetangga yang belum dikunjungi
         private void penelusuran(string node, Dictionary<string, List<string>> graph, HashSet<string> simpulDikunjungi)
@@ -251,20 +274,21 @@ namespace FITUR
         private void btnHelp_Click(object sender, EventArgs e)
         {
             string helpMessage = "This testing tool is used to show the complexity of the program.\n" +
-                         "You can upload files in these programming languages: C, C++, C#, Java, PHP.\n\n" +
-
-                         "1. Click 'Upload File' to select a source code file.\n" +
-                         "2. Click 'Run' to calculate the metrics.\n" +
-                         "Metrics:\n" +
-                         "- Total Edges (E) \n" +
-                         "- Total Nodes (N) \n" +
-                         "- Total Number of Connected Components (P) \n" +
-                         "- McCabe Cyclomatic Complexity((V(G) = E - N + 2P)).\n" +
-                         "3. Click 'Export CSV' to save data in a CSV file\n" +
-                         "4. Click 'Clear' to clear all data in this feature";
+                                 "You can upload files in these programming languages: C, C++, C#, Java, PHP.\n\n" +
+                                 "1. Click 'Upload File' to select a source code file.\n" +
+                                 "2. Click 'Run' to calculate the metrics.\n" +
+                                 "Metrics:\n" +
+                                 "- Total Edges (E) \n" +
+                                 "- Total Nodes (N) \n" +
+                                 "- Total Number of Connected Components (P) \n" +
+                                 "- McCabe Cyclomatic Complexity((V(G) = E - N + 2P)).\n" +
+                                 "'If less than 10 is low, 10 - 20 is medium, more than 20 is complex'\n" +
+                                 "3. Click 'Export CSV' to save data in a CSV file\n" +
+                                 "4. Click 'Clear' to clear all data in this feature";
 
             MessageBox.Show(helpMessage, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
         private void btnClear_Click(object sender, EventArgs e)
         {
             txtdirectory.Clear();
@@ -287,7 +311,7 @@ namespace FITUR
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        string csvFilePath = saveFileDialog.FileName;
+                        string csvFilePath = Path.Combine(saveFileDialog.InitialDirectory, saveFileDialog.FileName);
 
                         // Write the content of txtOutput to the selected CSV file
                         File.WriteAllText(csvFilePath, txtOutput.Text);
@@ -305,8 +329,5 @@ namespace FITUR
                 MessageBox.Show("No metrics to export", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
-
-
     }
 }
