@@ -29,7 +29,7 @@ namespace FITUR
         {
             OpenFileDialog openfile = new OpenFileDialog();
             // Set filter untuk file C dan C++
-            openfile.Filter = "C/C++ Files (*.c; *.cpp)|*.c;*.cpp|Java Files (*.java)|*.java|C# Files (*.cs)|*.cs|PHP Files (*.php)|*.php";
+            openfile.Filter = "Java Files (*.java)|*.java|C++ Files ( *.cpp)|*.cpp|C# Files (*.cs)|*.cs|PHP Files (*.php)|*.php";
 
             DialogResult result = openfile.ShowDialog();
 
@@ -85,14 +85,12 @@ namespace FITUR
                 // Hitung metrik tambahan sesuai kebutuhan (contoh: panjang rata-rata baris kode)
                 double komplesitasSiklomata = jumlahTepi - jumlahSimpul + 2 * jumlahKomponen;
 
-                string complexityCategory = KategorisasiKompleksitasSiklomata(komplesitasSiklomata);
-
                 // Menampilkan metrik di TextBox
-                string metrikMessage = $"Total Edges: {jumlahTepi}\r\n" +
+                string metrikMessage = $"FileName: {Path.GetFileName(filePath)}\r\n\n" +
+                                       $"Total Edges: {jumlahTepi}\r\n" +
                                        $"Total Nodes: {jumlahSimpul}\r\n" +
                                        $"Total Number of Connected Components: {jumlahKomponen}\r\n" +
-                                       $"Cyclomatic Complexity (V(G) = E - N + 2P) = {komplesitasSiklomata}\r\n" +
-                                       $"Complexity Category: {complexityCategory}";
+                                       $"Cyclomatic Complexity (V(G) = E - N + 2P) = {komplesitasSiklomata}\r\n";
 
                 txtOutput.Text = metrikMessage;
                 uploadedFilePath = code;
@@ -103,23 +101,6 @@ namespace FITUR
                 MessageBox.Show("File not found.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
-        private string KategorisasiKompleksitasSiklomata(double kompleksitasSiklomata)
-        {
-            if (kompleksitasSiklomata <= 10)
-            {
-                return "Low";
-            }
-            else if (kompleksitasSiklomata <= 20)
-            {
-                return "Medium";
-            }
-            else
-            {
-                return "High";
-            }
-        }
-
         private static int HitungTepi(string code)
         {
             // Implementasi kompleksitas siklomatik di sini (gunakan metode sebelumnya atau metode lainnya)
@@ -255,7 +236,6 @@ namespace FITUR
 
             return kontrolAliranGraf;
         }
-
         // Konsep ini untuk menelusuri graf kontrol aliran dari kode sumber
         // Mengecek apakah apakah setiap simpul telah dikunjungi dan melanjutkan untuk menjelajahi setiap tetangga yang belum dikunjungi
         private void penelusuran(string node, Dictionary<string, List<string>> graph, HashSet<string> simpulDikunjungi)
@@ -274,14 +254,16 @@ namespace FITUR
         private void btnHelp_Click(object sender, EventArgs e)
         {
             string helpMessage = "This testing tool is used to show the complexity of the program.\n" +
-                                 "You can upload files in these programming languages: C, C++, C#, Java, PHP.\n\n" +
+                                 "You can upload files in these programming languages: C++, C#, Java, PHP.\n" +
+                                 "if less than 10 is low, 10 - 20 is medium, dan more than 20 is high.\n\n" +
+
                                  "1. Click 'Upload File' to select a source code file.\n" +
                                  "2. Click 'Run' to calculate the metrics.\n" +
                                  "Metrics:\n" +
                                  "- Total Edges (E) \n" +
                                  "- Total Nodes (N) \n" +
                                  "- Total Number of Connected Components (P) \n" +
-                                 "- McCabe Cyclomatic Complexity((V(G) = E - N + 2P)).\n" +
+                                 "- McCabe Cyclomatic Complexity ((V(G) = E - N + 2P)).\n" +
                                  "'If less than 10 is low, 10 - 20 is medium, more than 20 is complex'\n" +
                                  "3. Click 'Export CSV' to save data in a CSV file\n" +
                                  "4. Click 'Clear' to clear all data in this feature";
@@ -313,8 +295,12 @@ namespace FITUR
                     {
                         string csvFilePath = Path.Combine(saveFileDialog.InitialDirectory, saveFileDialog.FileName);
 
-                        // Write the content of txtOutput to the selected CSV file
-                        File.WriteAllText(csvFilePath, txtOutput.Text);
+                        string firstMessage = "Cyclomatic Complexitys\n";
+                        string endMessage = "\n Shepperd, M. (1988). Critique of Cyclomatic Complexity As a Software Metric. Software Engineering Journal, 3(2), 30–36. https://doi.org/10.1049/sej.1988.0003\r\n\r\n"; 
+                        string contentToWrite = firstMessage + txtOutput.Text + endMessage;
+
+                        // Write the combined content to the selected CSV file
+                        File.WriteAllText(csvFilePath, contentToWrite);
 
                         MessageBox.Show("Metrics saved to CSV file.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -328,6 +314,24 @@ namespace FITUR
             {
                 MessageBox.Show("No metrics to export", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void btnInfo1_Click(object sender, EventArgs e)
+        {
+            string Info1Message = "Cyclomatic complexity is software metric that provides a quantitative measure of the logical complexity of a program (Pressman2001)";
+
+            MessageBox.Show(Info1Message, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnInfo2_Click(object sender, EventArgs e)
+        {
+            string Info2Message = "to calculate cyclomatic complexity is as follows: \r\n\r\n" +
+                "McCabe Cyclomatic Complexity ((V(G) = E - N + 2P)) and to calculate each matrix is as follows:\r\n\n" +           
+                "1. Counting the number of edges, you can count all the arrows or lines that connect the vertices in a control flow graph.\n" +
+                "2. Counting A node in a control flow graph represents a point in the program at which execution can begin or end.\n" +
+                "3. Calculating Connected Components is a group of nodes in a graph that are connected to each other, but not connected to nodes outside the group.";
+
+            MessageBox.Show(Info2Message, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
