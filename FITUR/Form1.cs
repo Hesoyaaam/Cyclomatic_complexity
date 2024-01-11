@@ -74,7 +74,7 @@ namespace FITUR
                 string code = File.ReadAllText(filePath);
 
                 // Hitung jumlah tepi
-                int jumlahTepi = HitungTepi(code);
+                int jumlahTepi = HitungEdge(code);
 
                 // Hitung jumlah simpul
                 int jumlahSimpul = HitungNode(code);
@@ -87,8 +87,8 @@ namespace FITUR
 
                 // Menampilkan metrik di TextBox
                 string metrikMessage = $"FileName: {Path.GetFileName(filePath)}\r\n\n" +
-                                       $"Total Edges: {jumlahTepi}\r\n" +
-                                       $"Total Nodes: {jumlahSimpul}\r\n" +
+                                       $"Total Number of Edges: {jumlahTepi}\r\n" +
+                                       $"Total Number of Nodes: {jumlahSimpul}\r\n" +
                                        $"Total Number of Connected Components: {jumlahKomponen}\r\n" +
                                        $"Cyclomatic Complexity (V(G) = E - N + 2P) = {komplesitasSiklomata}\r\n";
 
@@ -101,7 +101,7 @@ namespace FITUR
                 MessageBox.Show("File not found.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-        private static int HitungTepi(string code)
+        private static int HitungEdge(string code)
         {
             // Implementasi kompleksitas siklomatik di sini (gunakan metode sebelumnya atau metode lainnya)
             int edgeCount = 0;
@@ -260,8 +260,8 @@ namespace FITUR
                                  "1. Click 'Upload File' to select a source code file.\n" +
                                  "2. Click 'Run' to calculate the metrics.\n" +
                                  "Metrics:\n" +
-                                 "- Total Edges (E) \n" +
-                                 "- Total Nodes (N) \n" +
+                                 "- Total Number of Edges (E) \n" +
+                                 "- Total Number of Nodes (N) \n" +
                                  "- Total Number of Connected Components (P) \n" +
                                  "- McCabe Cyclomatic Complexity ((V(G) = E - N + 2P)).\n" +
                                  "'If less than 10 is low, 10 - 20 is medium, more than 20 is complex'\n" +
@@ -332,6 +332,11 @@ namespace FITUR
                 "3. Calculating Connected Components is a group of nodes in a graph that are connected to each other, but not connected to nodes outside the group.";
 
             MessageBox.Show(Info2Message, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
